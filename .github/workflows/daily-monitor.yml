@@ -1,0 +1,75 @@
+name: Acionar monitor B3
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Sao Paulo (UTC-3): 08h07, 08h27, 08h47 e 09h07, de segunda a sexta.
+    - cron: "7,27,47 11 * * 1-5"
+    - cron: "7 12 * * 1-5"
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: b3-options-daily-public-scheduler
+  cancel-in-progress: false
+
+jobs:
+  monitor-and-email:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: ${{ github.workspace }}/monitor/src
+      EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+      EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+      EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+    steps:
+      - name: Verificar se o e-mail de hoje ja foi enviado
+        id: daily-email
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          today="$(TZ=America/Sao_Paulo date +%F)"
+          successful_runs="$(
+            gh api --method GET \
+              "/repos/${GITHUB_REPOSITORY}/actions/workflows/daily-monitor.yml/runs" \
+              -f status=success \
+              -f created="$today" \
+              -f per_page=50 \
+              --jq '.total_count'
+          )"
+
+          if [ "$successful_runs" -gt 0 ]; then
+            echo "send=false" >> "$GITHUB_OUTPUT"
+            echo "O e-mail de $today ja foi enviado; esta tentativa sera ignorada."
+          else
+            echo "send=true" >> "$GITHUB_OUTPUT"
+            echo "Nenhum envio concluido em $today; o relatorio sera gerado."
+          fi
+
+      - name: Baixar o monitor privado
+        if: steps.daily-email.outputs.send == 'true'
+        uses: actions/checkout@v7
+        with:
+          repository: jkondi18/b3-options-monitor
+          ssh-key: ${{ secrets.PRIVATE_REPO_SSH_KEY }}
+          persist-credentials: false
+          path: monitor
+
+      - name: Configurar Python
+        if: steps.daily-email.outputs.send == 'true'
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Gerar oportunidades com dados EOD
+        if: steps.daily-email.outputs.send == 'true'
+        working-directory: monitor
+        run: python -m b3_options_monitor.cli brapi-daily --refresh > /tmp/monitor-output.json
+
+      - name: Enviar relatorio por e-mail
+        if: steps.daily-email.outputs.send == 'true'
+        working-directory: monitor
+        run: python -m b3_options_monitor.cli send-email
