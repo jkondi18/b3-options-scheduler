@@ -9,3 +9,9 @@ Agendador publico e sem dados pessoais para executar um monitor privado de opcoe
 
 O monitor gera um ranking educacional com dados EOD. Ele nao envia ordens e nao
 representa recomendacao de investimento ou garantia de lucro.
+
+## Relogio externo
+
+O diretorio `cloudflare/` contem um Worker gratuito que dispara este workflow
+por meio da API oficial do GitHub. O token usado pelo Worker deve ser de acesso
+fino, limitado a este repositorio e somente com a permissao `Actions: write`.

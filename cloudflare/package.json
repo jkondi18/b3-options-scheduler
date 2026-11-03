@@ -1,0 +1,12 @@
+{
+  "name": "b3-options-clock",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "whoami": "wrangler whoami"
+  },
+  "devDependencies": {
+    "wrangler": "^4.157.0"
+  }
+}

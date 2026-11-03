@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "b3-options-clock",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-03",
+  "workers_dev": false,
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": [
+      "7 11 * * MON-FRI",
+      "27 11 * * MON-FRI",
+      "47 11 * * MON-FRI",
+      "7 12 * * MON-FRI",
+      "*/5 * * * *"
+    ]
+  }
+}
