@@ -6,6 +6,8 @@ on:
     # Sao Paulo (UTC-3): 08h07, 08h27, 08h47 e 09h07, de segunda a sexta.
     - cron: "7,27,47 11 * * 1-5"
     - cron: "7 12 * * 1-5"
+    # Verificacao temporaria do disparo automatico; remover apos o primeiro teste.
+    - cron: "*/5 * * * *"
 
 permissions:
   actions: read
