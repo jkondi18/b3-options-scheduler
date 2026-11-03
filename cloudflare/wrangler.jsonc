@@ -4,6 +4,7 @@
   "main": "src/index.js",
   "compatibility_date": "2026-11-03",
   "workers_dev": false,
+  "preview_urls": false,
   "observability": {
     "enabled": true
   },
@@ -12,8 +13,7 @@
       "7 11 * * MON-FRI",
       "27 11 * * MON-FRI",
       "47 11 * * MON-FRI",
-      "7 12 * * MON-FRI",
-      "*/5 * * * *"
+      "7 12 * * MON-FRI"
     ]
   }
 }
